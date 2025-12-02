@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const sessionToken = req.cookies.get("better-auth.session_token")?.value;
+  const sessionToken = req.cookies.get(
+    "__Secure-better-auth.session_token"
+  )?.value;
 
   // If no session token → redirect to /auth
   if (!sessionToken) {
