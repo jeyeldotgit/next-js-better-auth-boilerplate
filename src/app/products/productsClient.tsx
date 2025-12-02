@@ -1,12 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  getProducts,
+  addProduct,
+  deleteProduct,
+  updateProduct,
+} from "./product-actions";
 
 export interface Product {
   id: string;
   name: string;
   price: number;
-  description?: string;
+  description?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export default function ProductsClient() {
@@ -15,49 +23,58 @@ export default function ProductsClient() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [form, setForm] = useState({ name: "", price: 0, description: "" });
 
-  // Fetch products (placeholder)
-  const fetchProducts = async () => {
-    setLoading(true);
-    console.log("Fetching products...");
-    // Placeholder: simulate fetched products
-    setProducts([
-      {
-        id: "1",
-        name: "Sample Product 1",
-        price: 100,
-        description: "Sample desc 1",
-      },
-      { id: "2", name: "Sample Product 2", price: 200 },
-    ]);
-    setLoading(false);
-  };
-
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    const getProductsData = async () => {
+      try {
+        const res = await getProducts();
+        setProducts(res);
+      } catch (err) {
+        console.error("Failed to load products", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getProductsData();
+  }, []); // empty dependency array → runs only once on mount
 
   // Handle form changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setForm({
+      ...form,
+      [name]: name === "price" ? parseFloat(value) || 0 : value,
+    });
   };
 
   // Create or update product (placeholder)
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (editingProduct) {
-      console.log("Updating product:", { ...editingProduct, ...form });
+      // Update logic
+      const updated = { ...editingProduct, ...form };
+      console.log("Updating product:", updated);
+      setProducts((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p))
+      );
+
+      await updateProduct(editingProduct.id, form);
     } else {
-      console.log("Creating new product:", form);
+      const newProduct = await addProduct(form); // server action
+      console.log("Adding product:", newProduct);
+      setProducts((prev) => [...prev, newProduct]); // <-- add new product to state
     }
-    // Reset form
+
     setForm({ name: "", price: 0, description: "" });
     setEditingProduct(null);
   };
 
   // Edit product
-  const handleEdit = (product: Product) => {
+  const handleEdit = async (product: Product) => {
     console.log("Editing product:", product);
     setEditingProduct(product);
     setForm({
@@ -68,9 +85,11 @@ export default function ProductsClient() {
   };
 
   // Delete product (placeholder)
-  const handleDelete = (id: string) => {
-    console.log("Deleting product with id:", id);
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = async (id: string) => {
+    const res = await deleteProduct(id); // server action
+    if (res) {
+      console.log("Deleted product:", res);
+    }
   };
 
   if (loading) {
