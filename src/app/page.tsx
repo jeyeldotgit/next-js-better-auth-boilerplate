@@ -10,19 +10,12 @@ export default function LandingPage() {
           <span className="font-semibold">Better Auth</span> in Next.js.
         </p>
 
-        <div className="grid gap-4 sm:grid-cols-2 mt-10">
+        <div className=" mt-10">
           <Link
             href="/auth"
-            className="px-6 py-3 rounded-2xl shadow bg-black text-white hover:bg-gray-800 transition text-center"
+            className="px-12 py-5 rounded-2xl shadow bg-black text-white hover:bg-gray-800 transition text-center"
           >
             Get Started
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className="px-6 py-3 rounded-2xl shadow bg-white border hover:bg-gray-100 transition text-center"
-          >
-            Go to Dashboard
           </Link>
         </div>
       </div>
